@@ -1,0 +1,71 @@
+sitemap home label="Casa"
+{
+     Frame label="Estudio"
+     {
+         Text item=EstudioTemp label="Temperatura [%.1f °C]" icon="temperature"
+         Text item=EstudioHumidity label="Humedad [%.1f]" icon="humidity"
+	     Text item=EstudioBrigth label="Iluminacion [%.1f]" icon="slider"
+         Switch item=EstudioLight label="Luz" icon="switch"
+         Slider item=EstudioCurtain label="Cortinas" icon="rollershutter"
+         Text item=EstudioFireAlarm label="Fuego" icon="fire"
+         Text item=EstudioSmokeAlarm label="Humo" icon="smoke"
+         Text item=EstudioPC label="PC" icon="screen"
+         Text item=EstudioLaserPrinter label="Impresora Laser" icon="rgb"
+         Text item=EstudioInkPrinter label="Impresora" icon="rgb"
+     }
+
+     Frame label="Recamara"
+     {
+         Text item=RecamaraTemp label="Temperatura [%.1f °C]" icon="temperature"
+         Text item=RecamaraHumidity label="Humedad [%.1f]" icon="humidity"
+         Text item=RecamaraBrigth label="Iluminacion [%.1f]" icon="slider"
+         Switch item=RecamaraLight label="Luz" icon="switch"
+         Slider item=RecamaraCurtain label="Cortinas" icon="rollershutter"
+         Text item=RecamaraFireAlarm label="Fuego" icon="fire"
+         Text item=RecamaraSmokeAlarm label="Humo" icon="smoke"
+         Switch item=RecamaraTV label="TV" icon="switch"
+         Slider item=RecamaraTVVolume label="TV Volumen" icon="soundvolume"
+         Slider item=RecamaraTVChannel label="TV Canal" icon="mediacontrol"
+         Switch item=RecamaraTVMute label="TV Mute" icon="soundvolume"
+     }
+
+     Frame label="Sala"
+     {
+         Text item=SalaTemp label="Temperatura [%.1f °C]" icon="temperature"
+         Text item=SalaHumidity label="Humedad [%.1f]" icon="humidity"
+         Text item=SalaBrigth label="Iluminacion [%.1f]" icon="slider"
+         Switch item=SalaLight label="Luz" icon="switch"
+         Slider item=SalaCurtain label="Cortinas" icon="rollershutter"
+         Text item=SalaFireAlarm label="Fuego" icon="fire"
+         Text item=SalaSmokeAlarm label="Humo" icon="smoke"
+     }
+
+     Frame label="Cocina"
+     {
+         Text item=CocinaTemp label="Temperatura [%.1f °C]" icon="temperature"
+         Text item=CocinaHumidity label="Humedad [%.1f]" icon="humidity"
+         Text item=CocinaBrigth label="Iluminacion [%.1f]" icon="slider"
+         Switch item=CocinaLight label="Luz" icon="switch"
+         Slider item=SalaCurtain label="Cortinas" icon="rollershutter"
+         Text item=CocinaFireAlarm label="Fuego" icon="fire"
+         Text item=CocinaSmokeAlarm label="Humo" icon="smoke"
+         Text item=CocinaGasAlarm label="Gas" icon="gas"
+    }
+
+    Frame label="Patio"
+     {
+         Text item=PatioTemp label="Temperatura [%.1f °C]" icon="temperature"
+         Text item=PatioHumidity label="Humedad [%.1f]" icon="humidity"
+         Text item=PatioBrigth label="Iluminacion [%.1f]" icon="slider"
+         Switch item=PatioLight label="Luz" icon="switch"
+         Text item=PatioFireAlarm label="Fuego" icon="fire"
+         Text item=PatioSmokeAlarm label="Humo" icon="smoke"
+         Text item=PatioGasAlarm label="Gas" icon="gas"
+    }
+
+    Frame label="Accesos"
+     {
+         Text item=PuertaPrincipal label="Puerta Principal" icon="frontdoor"
+    }
+
+}

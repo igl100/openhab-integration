@@ -1,0 +1,49 @@
+Number EstudioTemp "Temperatura Estudio [%.1f]"                {mqtt="<[broker:home/room/computer/temperature:state:JS(trim.js)]"}
+Number EstudioHumidity "Humedad Estudio [%.1f]"                {mqtt="<[broker:home/room/computer/humidity:state:JS(trim.js)]"}
+Number EstudioBrigth "Cantidad de Luz en Estudio [%.1f]"       {mqtt="<[broker:home/room/computer/bright:state:JS(trim.js)]"}
+Switch EstudioLight "Switch de luz en Estudio"                 {mqtt=">[broker:home/room/computer/light:command:ON:1],>[broker:home/room/computer/light:command:OFF:0]"}
+Switch EstudioFireAlarm "Alarma de Fuego en Estudio [%s]"      {mqtt="<[broker:home/room/computer/fire:state:JS(trim.js)]"}
+Switch EstudioSmokeAlarm "Alarma de Humo en Estudio [%s]"      {mqtt="<[broker:home/room/computer/smoke:state:JS(trim.js)]"}
+Dimmer EstudioCurtain  "Cortinas en Estudio [%.1f]"            {mqtt=">[broker:home/room/computer/curtains:command:*:default]"}
+Switch EstudioPC "Computadora en Estudio [%s]"                 {mqtt="<[broker:home/room/computer/pc:state:JS(trim.js)]"}
+Switch EstudioLaserPrinter "Impresora Laser en Estudio [%s]"   {mqtt="<[broker:home/room/computer/laser/state:state:JS(trim.js)]"}
+Switch EstudioInkPrinter "Impresora Injeccion en Estudio [%s]" {mqtt="<[broker:home/room/computer/ink/state:state:JS(trim.js)]"}
+
+Number RecamaraTemp "Temperatura Recamara [%.1f]"           {mqtt="<[broker:home/room/bedroom/temperature:state:JS(trim.js)]"}
+Number RecamaraHumidity "Humedad Recamara [%.1f]"           {mqtt="<[broker:home/room/bedroom/humidity:state:JS(trim.js)]"}
+Number RecamaraBrigth "Cantidad de Luz en Recamara [%.1f]"  {mqtt="<[broker:home/room/bedroom/bright:state:JS(trim.js)]"}
+Switch RecamaraLight "Switch de luz en Recamara"            {mqtt=">[broker:home/room/bedroom/light:command:ON:1],>[broker:home/room/bedroom/light:command:OFF:0]"}
+Switch RecamaraFireAlarm "Alarma de Fuego en Recamara [%s]" {mqtt="<[broker:home/room/bedroom/fire:state:JS(trim.js)]"}
+Switch RecamaraSmokeAlarm "Alarma de Humo en Recamara [%s]" {mqtt="<[broker:home/room/bedroom/smoke:state:JS(trim.js)]"}
+Dimmer RecamaraCurtain  "Cortinas en Recamara [%.1f]"       {mqtt=">[broker:home/room/bedroom/curtains:command:*:default]"}
+Switch RecamaraTV "TV en Recamara"                          {mqtt=">[broker:home/room/bedroom/tv/state:command:ON:1],>[broker:home/room/bedroom/tv/state:command:OFF:0]"}
+Dimmer RecamaraTVVolume  "Volumen TV en Recamara [%.1f]"    {mqtt=">[broker:home/room/bedroom/tv/volume:command:*:default]"}
+Dimmer RecamaraTVChannel  "Canal TV en Recamara [%.1f]"     {mqtt=">[broker:home/room/bedroom/tv/channel:command:*:default]"}
+Switch RecamaraTVMute "TV Mute en Recamara"                 {mqtt=">[broker:home/room/bedroom/tv/mute:command:ON:1],>[broker:home/room/bedroom/tv/mute:command:OFF:0]"}
+
+Number SalaTemp "Temperatura Sala [%.1f]"                {mqtt="<[broker:home/room/livingroom/temperature:state:JS(trim.js)]"}
+Number SalaHumidity "Humedad Sala [%.1f]"                {mqtt="<[broker:home/room/livingroom/humidity:state:JS(trim.js)]"}
+Number SalaBrigth "Cantidad de Luz en Sala [%.1f]"       {mqtt="<[broker:home/room/livingroom/bright:state:JS(trim.js)]"}
+Switch SalaLight "Switch de luz en Sala"                 {mqtt=">[broker:home/room/livingroom/light:command:ON:1],>[broker:home/room/livingroom/light:command:OFF:0]"}
+Switch SalaFireAlarm "Alarma de Fuego en Sala [%s]"      {mqtt="<[broker:home/room/livingroom/fire:state:JS(trim.js)]"}
+Switch SalaSmokeAlarm "Alarma de Humo en Sala [%s]"      {mqtt="<[broker:home/room/livingroom/smoke:state:JS(trim.js)]"}
+Dimmer SalaCurtain  "Cortinas en Sala [%.1f]"            {mqtt=">[broker:home/room/livingroom/curtains:command:*:default]"}
+
+Number CocinaTemp "Temperatura Cocina [%.1f]"           {mqtt="<[broker:home/room/kitchen/temperature:state:JS(trim.js)]"}
+Number CocinaHumidity "Humedad Cocina [%.1f]"           {mqtt="<[broker:home/room/kitchen/humidity:state:JS(trim.js)]"}
+Number CocinaBrigth "Cantidad de Luz en Cocina [%.1f]"  {mqtt="<[broker:home/room/kitchen/bright:state:JS(trim.js)]"}
+Switch CocinaLight "Switch de luz en Cocina"            {mqtt=">[broker:home/room/kitchen/light:command:ON:1],>[broker:home/room/kitchen/light:command:OFF:0]"}
+Switch CocinaFireAlarm "Alarma de Fuego en Cocina [%s]" {mqtt="<[broker:home/room/kitchen/fire:state:JS(trim.js)]"}
+Switch CocinaSmokeAlarm "Alarma de Humo en Cocina [%s]" {mqtt="<[broker:home/room/kitchen/smoke:state:JS(trim.js)]"}
+Switch CocinaGasAlarm "Alarma de Gas en Cocina [%s]"    {mqtt="<[broker:home/room/kitchen/gas:state:JS(trim.js)]"}
+
+Number PatioTemp "Temperatura Patio [%.1f]"                {mqtt="<[broker:home/room/laundry/temperature:state:JS(trim.js)]"}
+Number PatioHumidity "Humedad Patio [%.1f]"                {mqtt="<[broker:home/room/laundry/humidity:state:JS(trim.js)]"}
+Number PatioBrigth "Cantidad de Luz en Patio [%.1f]"       {mqtt="<[broker:home/room/laundry/bright:state:JS(trim.js)]"}
+Switch PatioLight "Switch de luz en Patio"                 {mqtt=">[broker:home/room/laundry/light:command:ON:1],>[broker:home/room/laundry/light:command:OFF:0]"}
+Switch PatioFireAlarm "Alarma de Fuego en Patio [%s]"      {mqtt="<[broker:home/room/laundry/fire:state:JS(trim.js)]"}
+Switch PatioSmokeAlarm "Alarma de Humo en Patio [%s]"      {mqtt="<[broker:home/room/laundry/smoke:state:JS(trim.js)]"}
+Switch PatioLeakAlarm "Alarma de Inundacion en Patio [%s]" {mqtt="<[broker:home/room/laundry/leak:state:JS(trim.js)]"}
+Switch PatioGasAlarm "Alarma de Gas en Patio [%s]"         {mqtt="<[broker:home/room/laundry/gas:state:JS(trim.js)]"}
+
+Switch PuertaPrincipal "Puerta Principal [%s]"      {mqtt="<[broker:home/doors/main:state:JS(trim.js)]"}

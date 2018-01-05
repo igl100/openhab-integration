@@ -50,6 +50,9 @@
 ### GENERATING KEYS
 - name: Setting up keys
   hosts: all
+  vars_files:
+     - settings/authentications
+     - settings/defaults
   gather_facts: False
   tasks:
       - name: Searching for keys
@@ -71,6 +74,14 @@
         command: "ssh-keygen -b 4096 -t rsa -f /root/.ssh/id_rsa -q -N \"\""
         tags:
            - ssh
+
+      - name: "Add my key to authorized_keys"
+        authorized_key:
+          user: root
+          state: present
+          key: "{{ lookup('file', '{{ ssh_key_file }}') }}"
+        tags:
+          - ssh
 
 ## ADDING OPENHAB REPOS
 - name: Adding Openhab repos
@@ -342,4 +353,34 @@
         tags:
           - installing_software
           - install_features
+
+      - name: Synchronizing Openhab transformation scripts
+        synchronize:
+          src: ./templates/openhab/transform
+          dest: /etc/openhab2
+          use_ssh_args: yes
+        tags:
+          - installing_software
+          - install_features
+          - sync_openhab
+
+      - name: Synchronizing Openhab items
+        synchronize:
+          src: ./templates/openhab/items
+          dest: /etc/openhab2
+          use_ssh_args: yes
+        tags:
+          - installing_software
+          - install_features
+          - sync_openhab
+
+      - name: Synchronizing Openhab Sitemaps
+        synchronize:
+          src: ./templates/openhab/sitemaps
+          dest: /etc/openhab2
+          use_ssh_args: yes
+        tags:
+          - installing_software
+          - install_features
+          - sync_openhab
 
