@@ -1,0 +1,48 @@
+### CREATE OPENHAB SERVER TASKS
+- name: Creating instance {{ ':' }} {{ openhab_host }}
+  gce:
+    instance_names: "{{ openhab_host }}"
+    state: "present"
+    machine_type: "{{ server_type }}"
+    image: "{{ image }}"
+    zone: "{{ zone }}"
+    network: "{{ network_name }}"
+    subnetwork: "{{ subnetwork_name }}"
+    tags: ["enable-ssh","enable-openhab"]
+    disk_auto_delete: True
+    project_id: "{{ gce_project_id }}"
+    credentials_file: "{{ gce_credentials_file }}"
+    service_account_email: "{{ gce_service_account_email }}"
+  ignore_errors: True
+  register: openhab_instance_creation
+  tags:
+     - create_openhab_server
+
+- debug: var=openhab_instance_creation
+
+- name: Getting OpenHAB Public IP{{ ':' }} {{ openhab_instance_creation.instance_data[0].public_ip }}
+  set_fact: openhab_public_ip={{ openhab_instance_creation.instance_data[0].public_ip }}
+
+- name: Getting OpenHAB Private IP{{ ':' }} {{ openhab_instance_creation.instance_data[0].private_ip }}
+  set_fact: openhab_private_ip={{ openhab_instance_creation.instance_data[0].private_ip }}
+  tags:
+     - create_openhab_server
+
+- name: Wait for OpenHAB instance to be up{{ ':' }} {{ openhab_public_ip }}
+  wait_for: host="{{ openhab_public_ip }}" port={{ ssh_default_image_port }} delay={{ instance_validate_delay }}  state=started
+  tags:
+     - openhab_instance_creation
+
+#"
+- name: Adding OpenHAB into group{{ ':' }} openhab_hosts
+  add_host: groups=openhab_group hostname={{ openhab_public_ip }}
+            private_ip={{ openhab_private_ip }} 
+            public_ip={{ openhab_public_ip }}
+            instance_name={{ openhab_host }}
+            ansible_user={{ ssh_default_image_user }} 
+            ansible_password={{ ssh_default_image_password }}
+            ansible_port={{ ssh_default_image_port }}
+  tags:
+     - openhab_instance_creation
+
+

@@ -1,0 +1,345 @@
+---
+- name: Create hosts for OpenHAB
+  hosts: localhost
+  connection: connection
+  gather_facts: False
+  vars_files:
+     - settings/authentications
+     - settings/defaults
+  tasks:
+### VARIABLES SETUP
+     - name: Setting Variables
+       include: ./commons.yaml
+       tags:
+          - always
+
+     - name: Defining OpenHAB server name {{ ':' }} {{ prefix_id }}-node
+       set_fact: openhab_host="{{ prefix_id }}-node"
+       tags:
+          - always
+
+### CREATE OPENHAB NODES
+     - name: Creating OpenHAB Server
+       include: ./create-server.yaml
+       tags:
+          - create_servers
+          - generating_inventory
+
+### CREATE DNS CONFIGS
+     - name: Creating DNS configurations
+       include: ./create-dns.yaml
+       tags:
+          - create_dns
+
+### CREATE INVENTORY FILE
+     - name: Deleting old hosts file
+       file:
+          path: "./tmp/hosts"
+          state: absent
+       ignore_errors: True
+       tags: 
+          - generating_inventory
+
+     - name: Copying OpenHAB inventory file template
+       template:
+          src: "./templates/inventory_hosts.j2"
+          dest: "./tmp/hosts"
+       tags:
+          - generating_inventory
+
+### GENERATING KEYS
+- name: Setting up keys
+  hosts: all
+  gather_facts: False
+  tasks:
+      - name: Searching for keys
+        find:
+           paths: /root/.ssh/
+        register: keys_to_delete
+        tags: 
+           - ssh
+
+      - name: Deleting old keys
+        file:
+           path: "{{ item.path }}"
+           state: absent
+        with_items: "{{ keys_to_delete.files }}"
+        tags: 
+           - ssh
+
+      - name: Generate keys for All Servers
+        command: "ssh-keygen -b 4096 -t rsa -f /root/.ssh/id_rsa -q -N \"\""
+        tags:
+           - ssh
+
+## ADDING OPENHAB REPOS
+- name: Adding Openhab repos
+  hosts: all
+  tasks:
+    - name: Uploading Openhab repo file
+      copy:
+        src: "templates/openhab.repo"
+        dest: "/etc/yum.repos.d/openhab.repo"
+        owner: root
+      tags:
+        - prepare
+
+## Hosts update
+- name: Updating servers
+  hosts: all
+  vars_files:
+     - settings/authentications
+     - settings/defaults
+  vars:
+     repositories:
+         - rhel-7-server-rpms
+         - rhel-7-server-extras-rpms
+     prereqs_packages:
+         - vim
+         - wget
+         - git
+         - net-tools
+         - bind-utils
+         - bridge-utils
+         - bash-completion
+         - yum-utils
+         - createrepo
+         - httpd
+         - unzip
+         - java-1.8.0-openjdk-devel.x86_64
+  gather_facts: False
+  tasks:
+    - name: RED HAT SUBSCRIPTION{{ ':' }} Installing Red Hat's Subscription Manager
+      yum: name=subscription-manager state=latest
+      ignore_errors: True
+      tags:
+         - prepare
+
+    - name: RED HAT SUBSCRIPTION{{ ':' }} Registering to Red Hat's Subscription Manager
+      command: subscription-manager register --username={{ redhat_subscription_username }}  --password={{ redhat_subscription_password }} --force
+      tags:
+         - prepare
+
+    - name: RED HAT SUBSCRIPTION{{ ':' }} Attaching a Pool ID
+      command: subscription-manager attach --pool={{ redhat_subscription_pool_id }}
+      tags:
+         - prepare
+
+    - name: RED HAT SUBSCRIPTION{{ ':' }} Disable all Repositories
+      command: subscription-manager repos --disable="*"
+      tags:
+         - prepare
+
+    - name: RED HAT SUBSCRIPTION{{ ':' }} Enabling Repository
+      command: subscription-manager repos --enable={{ item }}
+      with_items: "{{ repositories }}"
+      tags:
+         - prepare
+
+    - name: Updating the entire host
+      yum: name="*" state=latest
+      tags:
+         - prepare
+
+    - name: Installing all the necessary applications
+      yum: name="{{ item }}" state=latest
+      with_items: "{{ prereqs_packages }}"
+      tags:
+         - prepare
+
+#CHANGING FIREWALL SERVICE"
+
+- name: Changing firewalld to iptables
+  hosts: all
+  gather_facts: False
+  tasks:
+      - name: Installing iptables-services
+        yum:
+          name: iptables-services
+          state: latest
+        tags:
+           - iptables
+
+      - name: Disabling firewalld services
+        systemd:
+          masked: yes
+          name: firewalld
+          state: stopped
+        tags:
+           - iptables
+
+      - name: Running iptables service
+        systemd:
+          name: iptables
+          enabled: yes
+          state: started
+        tags:
+           - iptables
+
+      - name: Running ip6tables service
+        systemd:
+          name: ip6tables
+          enabled: yes
+          state: started
+        tags:
+           - iptables
+
+#OPENING PORTS
+- name: Changing firewalld to iptables
+  hosts: all
+  gather_facts: False
+  tasks:
+    - name: Open the correct IPTables ports
+      lineinfile: 
+        dest: /etc/sysconfig/iptables
+        line: "-A INPUT -p {{item.protocol}} -m state --state NEW -m {{item.protocol}} --dport {{item.port}} -j ACCEPT"
+        insertbefore: "^-A INPUT -j REJECT --reject-with icmp-host-prohibited$" 
+      with_items:
+        - { protocol: tcp, port: 80 }
+        - { protocol: tcp, port: 443 }
+        - { protocol: tcp, port: 22 }
+        - { protocol: tcp, port: 8080 }
+        - { protocol: tcp, port: 8161 }
+        - { protocol: tcp, port: 61616 }
+        - { protocol: tcp, port: 5445 }
+        - { protocol: tcp, port: 5672 }
+        - { protocol: tcp, port: 1883 }
+        - { protocol: tcp, port: 61613 }
+      tags:
+        - open-ports
+        - iptables
+
+    - name: Restarting IPTables service
+      service:
+        name: iptables
+        state: restarted
+      tags:
+        - open-ports
+        - iptables
+
+#INSTALLING JBOSS AMQ AND OPENHAB SOFTWARE
+- name: Installing Software
+  hosts: all
+  vars_files:
+      - settings/authentications
+      - settings/defaults
+  gather_facts: False
+  tasks:
+      - name: Copying JBoss AMQ installer
+        copy:
+          src: "{{ amq_installer }}"
+          dest: "/tmp/amq-broker.zip"
+        tags:
+          - copy_software
+
+      - name: Cleaning older installation
+        file:
+          state: absent
+          path: "/opt/redhat/amq-broker"
+        ignore_errors: True
+        tags:
+          - installing_software
+
+      - name: Create JBoss AMQ Folder
+        file: 
+          path: "/opt/redhat/amq-broker"
+          recurse: yes
+          state: directory
+        tags:
+          - installing_software
+
+      - name: Extracting JBoss AMQ
+        unarchive:
+          src: "/tmp/amq-broker.zip"
+          dest: "/opt/redhat/amq-broker"
+          remote_src: yes
+        tags:
+          - installing_software
+
+      - name: Creating broker
+        command: "/opt/redhat/amq-broker/amq-broker-7.0.3/bin/artemis create /opt/redhat/amq-broker/amq-broker-7.0.3/openhab --user admin --password admin --require-login"
+        tags:
+          - installing_software
+
+      - name: Changing web console address
+        replace:
+          dest: /opt/redhat/amq-broker/amq-broker-7.0.3/openhab/etc/bootstrap.xml
+          regexp: 'localhost'
+          replace: '0.0.0.0'
+          backup: yes
+        tags:
+          - installing_software
+
+      - name: Changing JBoss AMQ User and password
+        command: "sed -i -e \"s/admin = .*/admin = {{ amq_password }}/g\" /opt/redhat/amq-broker/amq-broker-7.0.3/openhab/etc/artemis-users.properties" 
+        tags:
+          - installing_software
+
+      - name: Starting JBoss AMQ Server
+        command: "/opt/redhat/amq-broker/amq-broker-7.0.3/openhab/bin/artemis-service start"
+        tags:
+          - installing_software
+
+      - name: Installing Openhab
+        yum:
+          name: openhab2
+          state: latest
+        tags:
+          - installing_software
+
+      - name: Installing Openhab addons
+        yum:
+          name: openhab2-addons
+          state: latest
+        tags:
+          - installing_software
+
+      - name: Enabling Openhab package
+        lineinfile: 
+          dest: /etc/openhab2/services/addons.cfg
+          line: "package = standard"
+        tags:
+          - installing_software
+
+      - name: Changing default Openhab password
+        command: "sed -i -e \"s/openhab = .*,/openhab = {{ openhab_password }},/g\" /var/lib/openhab2/etc/users.properties" 
+        tags:
+          - installing_software
+
+      - name: Starting Openhab service
+        service:
+          name: openhab2
+          state: started
+        tags:
+          - installing_software
+
+      - name: Wait for port 8080 to become open and contain "Welcome"
+        wait_for:
+          port: 8080
+          host: "127.0.0.1"
+          connect_timeout: 5
+        tags:
+          - installing_software
+
+      - name: Uploading Openhab features install file
+        copy:
+          src: "./templates/features.cfg"
+          dest: "/tmp/features.cfg"
+        tags:
+          - installing_software
+          - install_features
+
+      - name: Enabling Openhab features
+        command: "openhab-cli console -u openhab -p {{ openhab_password }} -f /tmp/features.cfg" 
+        tags:
+          - installing_software
+          - install_features
+
+      - name: Configuring Openhab to connecto to JBoss AMQ Server
+        template:
+          src: ./templates/mqtt.j2
+          dest: /etc/openhab2/services/mqtt.cfg
+        tags:
+          - installing_software
+          - install_features
+

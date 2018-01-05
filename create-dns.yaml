@@ -1,0 +1,29 @@
+# CREATING DNS ZONE
+- name: Create a basic zone with the minimum number of parameters.
+  gcdns_zone: 
+    zone: "{{openhab_dns_zone}}"
+    service_account_email: "{{ gce_service_account_email }}"
+    credentials_file: "{{ gce_credentials_file }}"
+    project_id: "{{ gce_project_id }}"
+  ignore_errors: true
+  tags:
+    - create_dns
+
+### "CREATE DNS CONFIG
+- name: Retriving OpenHAB node
+  set_fact: openhab_node={{ groups[['openhab_group'][0]] }}
+  tags:
+    - create_dns
+
+- name: Creating routes Open DNS config
+  gcdns_record:
+    service_account_email: "{{ gce_service_account_email }}"
+    credentials_file: "{{ gce_credentials_file }}"
+    project_id: "{{ gce_project_id }}"
+    record: '*.{{openhab_subdomain}}'
+    zone: '{{openhab_dns_zone}}'
+    type: A
+    overwrite: true
+    value: '{{ openhab_node[0] }}'
+  tags:
+    - create_dns
